@@ -1,0 +1,8 @@
+Detect what disks are bitlockered and what disk is being used as the boot drive.
+Take image of the disk that is bitlockered but raw.
+DO NOT PERFORM ANY ACTIONS on the boot drive/running OS.
+Grab disk and hexdump it similarly to how DiskXplorer does it.
+Find the Bitlocker signature to designate as block start
+Use partition table to find the partition end of the bitlocker partition.
+Take a copy of the current partitions & the current partition table (to prevent overwriting)
+Rewrite the partition table and label partition as NTFS???

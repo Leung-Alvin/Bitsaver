@@ -113,7 +113,7 @@ def get_hostname():
         return ("Error:", result.stderr)
 
 def get_bitlocker_status():
-    ps = "Get-BitLockerVolume"
+    ps = "Get-BitLockerVolume | Select-Object VolumeStatus"
     result = subprocess.run(["powershell", "-Command", ps], capture_output=True, text=True)
     if result.returncode == 0:
         return (result.stdout)
@@ -128,4 +128,4 @@ if __name__ == '__main__' :
             print('\n'.join("%s: %s" % item for item in attrs.items()))
             print('\n')
 
-    #print(get_bitlocker_status())
+    print(get_bitlocker_status())
