@@ -42,6 +42,19 @@ class DiskInfo:
     is_removable: bool
     partition_style: str
     letters: List[str]
+    volume_type : str
+    volume_status : str
+    capacity : float
+
+    def __post_init__(self):
+        if self.volume_type is None:
+            self.volume_type = ''
+        if self.volume_status is None:
+            self.volume_status = ''
+        if self.capacity is None:
+            self.capacity = 0.00
+
+
 
 def run_powershell_json(ps_command: str) -> Any:
     cp = run_powershell(ps_command)
@@ -100,7 +113,8 @@ $result | ConvertTo-Json -Depth 4
             is_readonly=bool(d.get("IsReadOnly")),
             is_removable=bool(d.get("IsRemovable")),
             partition_style=str(d.get("PartitionStyle") or ""),
-            letters=list(d.get("Letters") or [])
+            letters=list(d.get("Letters") or [],
+            **default_vals)
         ))
     return out
 
@@ -113,19 +127,44 @@ def get_hostname():
         return ("Error:", result.stderr)
 
 def get_bitlocker_status():
-    ps = "Get-BitLockerVolume | Select-Object VolumeStatus"
-    result = subprocess.run(["powershell", "-Command", ps], capture_output=True, text=True)
-    if result.returncode == 0:
-        return (result.stdout)
+    ps = "Get-BitLockerVolume | Select-Object -Property VolumeType, MountPoint, CapacityGB, VolumeStatus | ConvertTo-Json"
+    results = subprocess.run(["powershell", "-Command", ps ], capture_output=True, text=True)
+    if results.returncode == 0:
+        return (results.stdout)
     else:
-        return ("Error:", result.stderr)
+        return ("Error:", results.stderr)
+
 
 if __name__ == '__main__' :
     print("Computer Name:", get_hostname())
-    disks = list_disks()
-    for disk in disks:
-            attrs = vars(disk)
-            print('\n'.join("%s: %s" % item for item in attrs.items()))
-            print('\n')
+    val = get_bitlocker_status()
+    val_json = json.loads(val)
+    for jso in val_json:
+       jso['MountPoint'] = jso['MountPoint'].replace(':','')
+       if jso['VolumeType'] == 0:
+           jso['VolumeType'] = 'Operating System'
+       elif jso['VolumeType'] == 1:
+           jso['VolumeType'] = 'Data'
+       else:
+           raise ValueError('A new type of Volume has been found:',jso['VolumeType'])
 
-    print(get_bitlocker_status())
+       if jso['VolumeStatus'] == 0:
+           jso['VolumeStatus'] = 'Fully Decrypted'
+       elif jso['VolumeStatus'] == 1:
+           jso['VolumeStatus'] = 'Fully Encrypted'
+       else:
+           raise ValueError('A new type of VolumeStatus has been found:', jso['VolumeStatus'])
+#    print(val_json)
+    disks = list_disks()
+    for i in range(len(disks)):
+        disks[i]['volume_type'] = val_json[i]['VolumeType']
+        disks[i]['volume_status'] = val_json[i]['VolumeStatus']
+        disks[i]['capacity'] = val_json[i]['CapacityGB']
+        attrs = vars(disks[i])
+        attrs['letters'] = ''.join(attrs['letters'])
+#            attrs = vars(disk)
+#            print(type(attrs))
+#            attrs['letters'] = ''.join(attrs['letters'])
+
+        print('\n'.join("%s: %s" % item for item in attrs.items()))
+        print('\n')
