@@ -1,1 +1,3 @@
 simplediskimage
+pyuac
+pypiwin32

@@ -18,6 +18,8 @@ from PySide6.QtWidgets import (
     QDialog, QDialogButtonBox, QFormLayout, QFrame
 )
 
+import pyuac
+
 def run_powershell(ps_command: str) -> subprocess.CompletedProcess:
     exe = shutil.which("powershell") or shutil.which("powershell.exe")
     if not exe:
@@ -32,10 +34,10 @@ def is_windows() -> bool:
 
 @dataclass
 class DiskInfo:
-    number: int
-    size: int
+    disk_number: int
+    size_bytes: int
     bus_type: str
-    friendly_name: str
+    model_name: str
     is_system: bool
     is_boot: bool
     is_readonly: bool
@@ -44,15 +46,15 @@ class DiskInfo:
     letters: List[str]
     volume_type : str
     volume_status : str
-    capacity : float
+    capacity_GB : float
 
     def __post_init__(self):
         if self.volume_type is None:
             self.volume_type = ''
         if self.volume_status is None:
             self.volume_status = ''
-        if self.capacity is None:
-            self.capacity = 0.00
+        if self.capacity_GB is None:
+            self.capacity_GB = 0.00
 
 
 
@@ -104,18 +106,21 @@ $result | ConvertTo-Json -Depth 4
     out: List[DiskInfo] = []
     for d in data:
         out.append(DiskInfo(
-            number=int(d.get("Number")),
-            size=int(d.get("Size") or 0),
+            disk_number=int(d.get("Number")),
+            size_bytes=int(d.get("Size") or 0),
             bus_type=str(d.get("BusType") or ""),
-            friendly_name=str(d.get("FriendlyName") or ""),
+            model_name=str(d.get("FriendlyName") or ""),
             is_system=bool(d.get("IsSystem")),
             is_boot=bool(d.get("IsBoot")),
             is_readonly=bool(d.get("IsReadOnly")),
             is_removable=bool(d.get("IsRemovable")),
             partition_style=str(d.get("PartitionStyle") or ""),
-            letters=list(d.get("Letters") or [],
-            **default_vals)
-        ))
+            letters=list(d.get("Letters") or []),
+            volume_type="",
+            volume_status = "",
+            capacity_GB=0.00
+            )
+        )
     return out
 
 def get_hostname():
@@ -135,7 +140,7 @@ def get_bitlocker_status():
         return ("Error:", results.stderr)
 
 
-if __name__ == '__main__' :
+def main():
     print("Computer Name:", get_hostname())
     val = get_bitlocker_status()
     val_json = json.loads(val)
@@ -154,17 +159,19 @@ if __name__ == '__main__' :
            jso['VolumeStatus'] = 'Fully Encrypted'
        else:
            raise ValueError('A new type of VolumeStatus has been found:', jso['VolumeStatus'])
-#    print(val_json)
     disks = list_disks()
     for i in range(len(disks)):
-        disks[i]['volume_type'] = val_json[i]['VolumeType']
-        disks[i]['volume_status'] = val_json[i]['VolumeStatus']
-        disks[i]['capacity'] = val_json[i]['CapacityGB']
+        disks[i].volume_type = val_json[i]['VolumeType']
+        disks[i].volume_status= val_json[i]['VolumeStatus']
+        disks[i].capacity_GB = val_json[i]['CapacityGB']
         attrs = vars(disks[i])
         attrs['letters'] = ''.join(attrs['letters'])
-#            attrs = vars(disk)
-#            print(type(attrs))
-#            attrs['letters'] = ''.join(attrs['letters'])
-
         print('\n'.join("%s: %s" % item for item in attrs.items()))
         print('\n')
+    input("Press enter to close the window.")
+
+if __name__ == '__main__' :
+    if not pyuac.isUserAdmin():
+        pyuac.runAsAdmin()
+    else:
+        main()

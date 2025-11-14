@@ -1,4 +1,4 @@
-Detect what disks are bitlockered and what disk is being used as the boot drive.
+DONE: Detect what disks are bitlockered and what disk is being used as the boot drive.
 Take image of the disk that is bitlockered but raw.
 DO NOT PERFORM ANY ACTIONS on the boot drive/running OS.
 Grab disk and hexdump it similarly to how DiskXplorer does it.
