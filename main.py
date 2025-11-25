@@ -144,6 +144,11 @@ def main():
     print("Computer Name:", get_hostname())
     val = get_bitlocker_status()
     val_json = json.loads(val)
+    if not isinstance(val_json,list):
+        val_json = list() 
+        print(json.loads(val))
+        val_json = val_json.append(json.loads(val))
+    print("after",val_json)
     for jso in val_json:
        jso['MountPoint'] = jso['MountPoint'].replace(':','')
        if jso['VolumeType'] == 0:
