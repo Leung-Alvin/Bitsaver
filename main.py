@@ -30,6 +30,13 @@ def run_powershell(ps_command: str) -> subprocess.CompletedProcess:
         [exe, "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", ps_command],
         capture_output=True, text=True, encoding="utf-8", errors="replace"
     )
+def parse_colon_lines(stdout: str):
+    d = {}
+    for line in stdout.splitlines():
+        if ":" in line:
+            k,v = line.split(":",1)
+            d[k.strip()] = v.strip()
+    return d
 
 def is_windows() -> bool:
     return os.name == "nt"
@@ -262,7 +269,16 @@ def main_menu():
 
 def disk_menu(disk):
     attrs = vars(disk) 
-    print(attrs)
+    ps = "Get-Disk " + str(attrs['disk_number']) +" | Select-Object Number, FriendlyName, Size, PhysicalSectorSize,@{Name='TotalPhysicalSectors';Expression={ $_.Size / $_.PhysicalSectorSize }}"
+    ps = "Get-Disk " + str(attrs['disk_number']) +" | Select-Object Number, FriendlyName, LogicalSectorSize, @{Name='LBASectorCount'; Expression = { $_.Size / $_.LogicalSectorSize }}, Size"
+    results = subprocess.run(["powershell", "-Command", ps ], capture_output=True, text=True)
+    if results.returncode == 0:
+        print(results.stdout)
+    else:
+        return ("Error:", results.stderr)
+    disk_dict = parse_colon_lines(results.stdout)
+    sector_size = disk_dict['LogicalSectorSize']
+    num_sectors = disk_dict['LBASectorCount']
     while True:
         print("\n===Disk Menu===")
         print("1. Encrypt with Bitlocker")
