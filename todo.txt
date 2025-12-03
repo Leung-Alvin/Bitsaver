@@ -6,3 +6,4 @@ Find the Bitlocker signature to designate as block start
 Use partition table to find the partition end of the bitlocker partition.
 Take a copy of the current partitions & the current partition table (to prevent overwriting)
 Rewrite the partition table and label partition as NTFS???
+Unmount the disk after you select the correct parameters THEN do the writes with dd.exe

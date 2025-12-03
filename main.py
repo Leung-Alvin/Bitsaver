@@ -304,16 +304,28 @@ def disk_menu(disk):
             print("COUNT is ", partition_size)
 
         elif choice == "2":
-            FS = "ntfs"
+            FS = input("Enter File System Type ('ntfs','fat32','exfat'): ")
             START_LBA = test_hexdump(int(sector_size), r"\\.\PhysicalDrive"+str(disk_num)) 
             COUNT = int(num_sectors) - START_LBA
             print(START_LBA,COUNT)
+            disk_doppel(FS, START_LBA, COUNT, disk_num) 
+
 
         elif choice == "3":
             print("Ending")
             break
         else:
             print("Invalid Choice")
+
+
+def disk_doppel(fs, start, count, disk_number):
+    disk_str = "disk" + str(disk_number) + ":."
+    command = ".\\dd.exe boot(fs=" + fs +",start=" + str(start) + ",count=" + str(count)+"): " + disk_str
+    command = ".\\dd.exe /dl"
+    print(command)
+    result = subprocess.call(command)
+    #print("Output:\n", result.stdout)
+
 def main():
     print("Computer Name:", get_hostname())
     val = get_bitlocker_status()
@@ -357,7 +369,7 @@ def test_hexdump(sector_size, dev_path):
     GENERIC_READ  = 0x80000000
     FILE_SHARE_READ = 1
     OPEN_EXISTING = 3
-    print("Looking for Hex Pattern" + HEX_PATTERN)
+    print("Looking for Hex Pattern " + HEX_PATTERN)
 
     CreateFile = ctypes.windll.kernel32.CreateFileW
     ReadFile   = ctypes.windll.kernel32.ReadFile
