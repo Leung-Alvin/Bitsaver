@@ -10,6 +10,10 @@ import subprocess
 from dataclasses import dataclass
 from typing import List, Optional, Dict, Any
 from os import system
+import hexdump
+import msvcrt
+import ctypes
+import binascii
 
 from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtWidgets import (
@@ -149,11 +153,13 @@ def get_bitlocker_status():
         return ("Error:", results.stderr)
 
 def select_disk(disk_number, disks):
-    if disks[disk_number].is_boot == True:
-        return ("Error: Cannot select Boot disk.")
-    else:
-        return disks[disk_number]
-
+    try:
+        if disks[disk_number].is_boot == True:
+            return ("Error: Cannot select Boot disk.")
+        else:
+            return disks[disk_number]
+    except:
+        return ("Error: Disk does not exist.")
 def enable_bitlocker(mount_point, SECURE_STRING):
     formatted_mount_point = mount_point.replace("[","").replace(']',"")
     print(formatted_mount_point)
@@ -178,8 +184,7 @@ def print_disks():
     val_json = json.loads(val)
     if not isinstance(val_json,list):
         val_json = list() 
-        print(json.loads(val))
-        val_json = val_json.append(json.loads(val))
+        val_json.append(json.loads(val))
     for jso in val_json:
        jso['MountPoint'] = jso['MountPoint'].replace(':','')
        if jso['VolumeType'] == 0:
@@ -197,9 +202,13 @@ def print_disks():
            raise ValueError('A new type of VolumeStatus has been found:', jso['VolumeStatus'])
     disks = list_disks()
     for i in range(len(disks)):
-        disks[i].volume_type = val_json[i]['VolumeType']
-        disks[i].volume_status= val_json[i]['VolumeStatus']
-        disks[i].capacity_GB = val_json[i]['CapacityGB']
+        try:
+            disks[i].volume_type = val_json[i]['VolumeType']
+            disks[i].volume_status= val_json[i]['VolumeStatus']
+            disks[i].capacity_GB = val_json[i]['CapacityGB']
+        except:
+            disks[i].volume_type = "Unknown"
+            disks[i].volume_status = "Unknown"
         attrs = vars(disks[i])
         attrs['letters'] = ''.join(attrs['letters'])
         print('\n'.join("%s: %s" % item for item in attrs.items()))
@@ -212,8 +221,7 @@ def short_print_disks():
     val_json = json.loads(val)
     if not isinstance(val_json,list):
         val_json = list() 
-        print(json.loads(val))
-        val_json = val_json.append(json.loads(val))
+        val_json.append(json.loads(val))
     for jso in val_json:
        jso['MountPoint'] = jso['MountPoint'].replace(':','')
        if jso['VolumeType'] == 0:
@@ -231,7 +239,10 @@ def short_print_disks():
            raise ValueError('A new type of VolumeStatus has been found:', jso['VolumeStatus'])
     disks = list_disks()
     for i in range(len(disks)):
-        disks[i].volume_status= val_json[i]['VolumeStatus']
+        try:
+            disks[i].volume_status= val_json[i]['VolumeStatus']
+        except:
+            disks[i].volume_status = "Unknown"
         attrs = vars(disks[i])
         print("Disk Number:",attrs['disk_number'])
         print("Model Name:",attrs['model_name'])
@@ -269,7 +280,6 @@ def main_menu():
 
 def disk_menu(disk):
     attrs = vars(disk) 
-    ps = "Get-Disk " + str(attrs['disk_number']) +" | Select-Object Number, FriendlyName, Size, PhysicalSectorSize,@{Name='TotalPhysicalSectors';Expression={ $_.Size / $_.PhysicalSectorSize }}"
     ps = "Get-Disk " + str(attrs['disk_number']) +" | Select-Object Number, FriendlyName, LogicalSectorSize, @{Name='LBASectorCount'; Expression = { $_.Size / $_.LogicalSectorSize }}, Size"
     results = subprocess.run(["powershell", "-Command", ps ], capture_output=True, text=True)
     if results.returncode == 0:
@@ -277,22 +287,28 @@ def disk_menu(disk):
     else:
         return ("Error:", results.stderr)
     disk_dict = parse_colon_lines(results.stdout)
+    disk_num = disk_dict['Number']
     sector_size = disk_dict['LogicalSectorSize']
     num_sectors = disk_dict['LBASectorCount']
     while True:
         print("\n===Disk Menu===")
-        print("1. Encrypt with Bitlocker")
-        print("2. Decrypt with Bitlocker")
+        print("1. Find Bitlocker Sector")
+        print("2. Rebuild Bootlocker MBR")
         print("3. Exit")
         choice = input("Enter choice: ")
         print('\n')
 
         if choice == "1":
-            print("testing")
-           # enable_bitlocker(disk.
+            found_sector = test_hexdump(int(sector_size), r"\\.\PhysicalDrive"+str(disk_num)) 
+            partition_size = int(num_sectors) - int(found_sector)
+            print("COUNT is ", partition_size)
 
         elif choice == "2":
-            short_print_disks()
+            FS = "ntfs"
+            START_LBA = test_hexdump(int(sector_size), r"\\.\PhysicalDrive"+str(disk_num)) 
+            COUNT = int(num_sectors) - START_LBA
+            print(START_LBA,COUNT)
+
         elif choice == "3":
             print("Ending")
             break
@@ -335,6 +351,153 @@ def main():
 def test():
     print_disks()
     main_menu()
+def test_hexdump(sector_size, dev_path):
+    BLOCK_SECTORS = 128
+    HEX_PATTERN = "2D4656452D46532D"
+    GENERIC_READ  = 0x80000000
+    FILE_SHARE_READ = 1
+    OPEN_EXISTING = 3
+    print("Looking for Hex Pattern" + HEX_PATTERN)
+
+    CreateFile = ctypes.windll.kernel32.CreateFileW
+    ReadFile   = ctypes.windll.kernel32.ReadFile
+    SetFilePointer = ctypes.windll.kernel32.SetFilePointer
+
+    handle = CreateFile(
+        dev_path,
+        GENERIC_READ,
+        FILE_SHARE_READ,
+        None,
+        OPEN_EXISTING,
+        0,
+        None
+    )
+
+    if handle == -1:
+        raise OSError("Could not open raw device. Run as Administrator.")
+
+
+    # -------------------------
+    # PREPARE SEARCH PATTERN
+    # -------------------------
+    pattern = binascii.unhexlify(HEX_PATTERN)
+
+
+    # -------------------------
+    # GET DISK SIZE USING IOCTL
+    # -------------------------
+    import ctypes.wintypes as wt
+
+    GET_LENGTH_INFO = 0x0007405C
+    size_buf = ctypes.c_ulonglong()
+    returned = ctypes.c_ulong(0)
+
+    ioctl = ctypes.windll.kernel32.DeviceIoControl
+    ok = ioctl(
+        handle,
+        GET_LENGTH_INFO,
+        None, 0,
+        ctypes.byref(size_buf), ctypes.sizeof(size_buf),
+        ctypes.byref(returned),
+        None
+    )
+
+    if not ok:
+        raise OSError("Could not query disk size via DeviceIoControl.")
+
+    disk_size = size_buf.value
+    total_sectors = disk_size // sector_size
+
+    print(f"Disk size: {disk_size:,} bytes")
+    print(f"Total sectors: {total_sectors:,}")
+    print(f"Searching for pattern: {HEX_PATTERN}")
+
+
+    # -------------------------
+    # MAIN SEARCH LOOP
+    # -------------------------
+    read_bytes = BLOCK_SECTORS * sector_size
+    buffer = ctypes.create_string_buffer(read_bytes)
+    bytes_read = ctypes.c_ulong(0)
+
+    sector_index = 0
+    matches = []
+
+    print("\nStarting scan...\n")
+
+    while sector_index < total_sectors:
+        # seek to sector_index
+        offset = sector_index * sector_size
+        low = offset & 0xFFFFFFFF
+        high = (offset >> 32) & 0xFFFFFFFF
+        high_ptr = ctypes.c_long(high)
+
+        SetFilePointer(handle, low, ctypes.byref(high_ptr), 0)
+
+        # read block
+        ok = ReadFile(handle, buffer, read_bytes, ctypes.byref(bytes_read), None)
+        if not ok:
+            print(f"Read failed at sector {sector_index}")
+            break
+
+        data = buffer.raw[:bytes_read.value]
+
+        # search inside this block
+        idx = data.find(pattern)
+        if idx != -1:
+            # Convert byte offset → sector #
+            found_byte_offset = idx
+            found_sector = sector_index + (found_byte_offset // sector_size)
+            matches.append(found_sector)
+            sector_offset = (found_sector - sector_index) * sector_size
+            sector_data = data[sector_offset:sector_offset + sector_size]
+            print(f"FOUND MATCH at sector {found_sector}")
+            return found_sector
+            #hexdump.hexdump(sector_data)
+            #print("=== END SECTOR ===\n")
+
+        sector_index += BLOCK_SECTORS
+
+
+    print("\nScan complete.")
+    if matches:
+        print("Matches at sectors:", matches)
+    else:
+        print("No matches found.")    
+def test_hexdump1(sector_size, LBA, dev_path):
+    GENERIC_READ = 0x80000000
+    FILE_SHARE_READ = 1
+    OPEN_EXISTING = 3
+    CreateFile = ctypes.windll.kernel32.CreateFileW
+    ReadFile = ctypes.windll.kernel32.ReadFile
+    SetFilePointer = ctypes.windll.kernel32.SetFilePointer
+    pattern =  "2D4656452D46532D"
+
+    handle = CreateFile(dev_path, GENERIC_READ, FILE_SHARE_READ, None, OPEN_EXISTING, 0, None)
+
+    if handle == -1:
+        raise OSError("Could not open device. Run as Administrator.")
+
+    offset = LBA * sector_size
+    low = offset & 0xFFFFFFFF
+    high = (offset >> 32) & 0xFFFFFFFF
+
+    res = SetFilePointer(handle, low, ctypes.byref(ctypes.c_long(high)), 0)
+    if res == 0xFFFFFFFF:
+        raise OSError("Seek failed-invalid LBA or drive offset.")
+
+    buffer = ctypes.create_string_buffer(sector_size)
+    bytes_read = ctypes.c_ulong(0)
+
+    ok = ReadFile(handle,buffer,sector_size, ctypes.byref(bytes_read), None)
+
+    if not ok or bytes_read.value != sector_size:
+        raise OSerror("Read failed-drive may deny raw I/O or sector out of range.")
+
+    data = buffer.raw
+    hexdump.hexdump(data)
+
+    print(f"\nRead {sector_size} bytes from LBA {LBA} on {dev_path}")
 
 if __name__ == '__main__':
     if not pyuac.isUserAdmin():

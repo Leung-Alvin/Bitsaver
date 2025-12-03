@@ -1,3 +1,4 @@
-simplediskimage
 pyuac
 pypiwin32
+PySide6
+hexdump
