@@ -294,30 +294,37 @@ def disk_menu(disk):
         print("\n===Disk Menu===")
         print("1. Find Bitlocker Sector")
         print("2. Rebuild Bootlocker MBR")
-        print("3. Exit")
+        print("3. Read Boot Record")
+        print("4. Exit")
         choice = input("Enter choice: ")
         print('\n')
 
         if choice == "1":
-            found_sector = test_hexdump(int(sector_size), r"\\.\PhysicalDrive"+str(disk_num)) 
+            found_sector = find_bitlocker_sector(int(sector_size), r"\\.\PhysicalDrive"+str(disk_num)) 
             partition_size = int(num_sectors) - int(found_sector)
             print("COUNT is ", partition_size)
 
         elif choice == "2":
             FS = input("Enter File System Type ('ntfs','fat32','exfat'): ")
-            START_LBA = test_hexdump(int(sector_size), r"\\.\PhysicalDrive"+str(disk_num)) 
+            START_LBA = find_bitlocker_sector(int(sector_size), r"\\.\PhysicalDrive"+str(disk_num)) 
             COUNT = int(num_sectors) - START_LBA
             print(START_LBA,COUNT)
             disk_doppel(FS, START_LBA, COUNT, disk_num) 
 
-
         elif choice == "3":
+            data = read_boot_record(disk_num)
+            print(data)
+        elif choice == "4":
             print("Ending")
             break
         else:
             print("Invalid Choice")
 
-
+def read_boot_record(disk_number):
+    disk_fd = os.open(r"\\.\PhysicalDrive"+str(disk_number), os.O_RDONLY | os.O_BINARY)
+    data = os.read(disk_fd, 512)
+    os.close(disk_fd)
+    return(data)
 def disk_doppel(fs, start, count, disk_number):
     disk_str = "disk" + str(disk_number) + ":."
     command = ".\\dd.exe boot(fs=" + fs +",start=" + str(start) + ",count=" + str(count)+"): " + disk_str
@@ -363,7 +370,7 @@ def main():
 def test():
     print_disks()
     main_menu()
-def test_hexdump(sector_size, dev_path):
+def find_bitlocker_sector(sector_size, dev_path):
     BLOCK_SECTORS = 128
     HEX_PATTERN = "2D4656452D46532D"
     GENERIC_READ  = 0x80000000
@@ -374,6 +381,7 @@ def test_hexdump(sector_size, dev_path):
     CreateFile = ctypes.windll.kernel32.CreateFileW
     ReadFile   = ctypes.windll.kernel32.ReadFile
     SetFilePointer = ctypes.windll.kernel32.SetFilePointer
+    CloseHandle = ctypes.windll.kernel32.CloseHandle
 
     handle = CreateFile(
         dev_path,
@@ -464,9 +472,10 @@ def test_hexdump(sector_size, dev_path):
             sector_offset = (found_sector - sector_index) * sector_size
             sector_data = data[sector_offset:sector_offset + sector_size]
             print(f"FOUND MATCH at sector {found_sector}")
+            hexdump.hexdump(sector_data)
+            print("=== END SECTOR ===\n")
+            CloseHandle(handle)
             return found_sector
-            #hexdump.hexdump(sector_data)
-            #print("=== END SECTOR ===\n")
 
         sector_index += BLOCK_SECTORS
 
@@ -476,6 +485,7 @@ def test_hexdump(sector_size, dev_path):
         print("Matches at sectors:", matches)
     else:
         print("No matches found.")    
+
 def test_hexdump1(sector_size, LBA, dev_path):
     GENERIC_READ = 0x80000000
     FILE_SHARE_READ = 1
