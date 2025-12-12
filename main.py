@@ -328,7 +328,7 @@ def read_boot_record(disk_number):
 def disk_doppel(fs, start, count, disk_number):
     disk_str = "disk" + str(disk_number) + ":."
     command = ".\\dd.exe boot(fs=" + fs +",start=" + str(start) + ",count=" + str(count)+"): " + disk_str
-    command = ".\\dd.exe /dl"
+    #command = ".\\dd.exe /dl"
     print(command)
     result = subprocess.call(command)
     #print("Output:\n", result.stdout)
