@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1765583362.88595 "IEEE-conference-template-062824.tex" "IEEE-conference-template-062824.pdf" "IEEE-conference-template-062824" 1765583363.50773 0
+["pdflatex"] 1765587629.77449 "IEEE-conference-template-062824.tex" "IEEE-conference-template-062824.pdf" "IEEE-conference-template-062824" 1765587630.61242 0
   "C:/Program Files/MiKTeX/fonts/enc/dvips/base/8r.enc" 1458473887 4993 80dc9bab7f31fb78a000ccfed0e27cab ""
   "C:/Program Files/MiKTeX/fonts/tfm/adobe/courier/pcrr7t.tfm" 1136765053 960 379cc0019370a9e0208a0a3f949f847a ""
   "C:/Program Files/MiKTeX/fonts/tfm/adobe/courier/pcrr8r.tfm" 1136765053 1292 bd42be2f344128bff6d35d98474adfe3 ""
@@ -74,10 +74,13 @@
   "C:/Users/aleung/AppData/Roaming/MiKTeX/tex/latex/psnfss/omsptm.fd" 1585253778 595 95c2c0baea9c719a4be29a3d4122498b ""
   "C:/Users/aleung/AppData/Roaming/MiKTeX/tex/latex/psnfss/ot1pcr.fd" 1585253778 1025 1ed784d7bfe47179f3550d2303b073f8 ""
   "C:/Users/aleung/AppData/Roaming/MiKTeX/tex/latex/psnfss/ot1ptm.fd" 1585253778 1007 15056f4a61917ceed3a44e4ac11fcc52 ""
-  "IEEE-conference-template-062824.aux" 1765583363 2833 c4bf45c6141087c9aef6ba2bd5c9ff49 "pdflatex"
-  "IEEE-conference-template-062824.tex" 1765583361 18429 bb801c65084374d8067ed2f82465f0ae ""
+  "IEEE-conference-template-062824.aux" 1765587630 3538 e64eb1eade5950e71d1a5e8ab377b9fe "pdflatex"
+  "IEEE-conference-template-062824.tex" 1765587628 21776 4aee4d381bb50b63aeab14374fdbf73a ""
   "IEEEtran.cls" 1765567089 288304 5b2e4fa15b0f7eabb840ebf67df4c0f7 ""
+  "bitlockered_disk.png" 1765586552 13647 78e3e30290e8739c3d15bb60d1795af5 ""
+  "delete_partition.png" 1765586552 86056 706866ccadd897fe5335c928b279a7ac ""
   "fig1.png" 1765567089 13815 016052f2e09fbe31a21f6dc821b31ed9 ""
+  "menu.png" 1765583664 44530 2f34ac1c1e1368f77fa8c7d87604afbe ""
   (generated)
   "IEEE-conference-template-062824.aux"
   "IEEE-conference-template-062824.log"

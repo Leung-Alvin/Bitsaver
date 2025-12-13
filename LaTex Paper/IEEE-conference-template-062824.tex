@@ -55,7 +55,7 @@ complicated. Meticulous documentation is required to maintain integrity of an
 encrypted piece of evidence so that it can be used in the court of law [North
 Forensics].
 
-\subsection{BitSaver Objectives}
+\subsection{BitSaver Objectives and Motivation}
 When an individual manually deletes a BitLocker partition, the data does not
 get deleted. Instead, the disk marks the partition as unallocated space. Thus,
 the data remains on the drive. However, the data cannot be read directly due to
@@ -64,13 +64,13 @@ BitLocker partition in order to stall law enforcement. Standard data recovery
 will not work on a disk that has BitLocker as the data is unreadable prior to
 decryption.
 
-The goal of this project is to create a tool that can automate the recovery of
+The goal of this BitSaver is to create a tool that can automate the recovery of
 BitLocker partitions that have been turned into unallocated space on a disk.
-Typically, this happens when a storage medium has not been used or formatted.
+Typically, this happens when a storage device has not been used or formatted.
 However, it can also occur when an individual manually deletes partitions such
-as with Windows DiskPart. The project is focused on creating a tool that works
+as with Windows DiskPart. BitSaver is focused on creating a tool that works
 for Windows as that is the supermajority of systems that utilizes BitLocker. Thus,
-the project does not work for other operating systems like MacOS or Linux/UNIX.
+BitSaver does not work for other operating systems like MacOS or Linux/UNIX.
 
 Law enforcement, digital forensics, and enterprise IT technicians will be able
 to use this application to recover BitLocker partitions that have been deleted
@@ -81,10 +81,16 @@ the data at a later point (post-investigation). The suspect would still need to
 hide their recovery keys, but a barrier to information has formed for law
 enforcement. Another example would be if a trainee IT technician accidentally
 deleted a BitLocker partition on an important, critical data drive while trying
-to install the Windows operating system for another partition. This is where
-the application can be very useful.
+to install the Windows operating system for another partition. There is already many
+techniques for rewriting boot records to restore functionality. However, most tools
+require the user to perform potentially destructive disk writes, which can cause permanent
+data loss. This is where the application can be very useful. BitSaver automatically detects
+and locates BitLocker partitions, accurately calculates partition sizes, and writes boot records
+for its users.
 
-\subsection{BitSaver Plans}
+
+
+\subsection{BitSaver Plans and Implementation}
 To implement this tool, standard Python libraries, PowerShell commands, and
 Runtime Software's open source, free DriveDoppel executable were used. Python was used to implement a
 user-friendly interface to communicate with the user. Standard libraries like
@@ -94,27 +100,81 @@ Lastly, DriveDoppel was used to safely write boot records to a disk.
 
 When ran, the program will open up an interface that allows users to select
 numbers for their choices. The program will collect information about all disks
-detected on the system, including internal and external storage mediums.
+detected on the system, including internal and external storage devices.
 Afterwards, the device will allow users to perform actions on disks such as
 disk selection, hexdumping BitLocker sectors, and repair BitLocker boot
 records. The system also intentionally stops users from selecting the boot
-drive as an option to prevent damage on the operating system.
+drive as an option to prevent damage on the operating system. A depiction of the menu
+is shown in Fig.~\ref{fig:menu}. Users in this screen are able to see the hostname of the
+machine they are working on and see many useful attributes of the drives connected to the machine
+such as drive number, full enterprise drive name, encryption status, and capacity.
 
-\begin{figure}[htbp]
-\centerline{\includegraphics{fig1.png}}
-\caption{Example of a figure caption.}
-\label{fig}
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{menu.png}
+\caption{BitSaver CLI for users to choose options.}
+\label{fig:menu}
 \end{figure}
 
-\section{Prepare Your Paper Before Styling}
-Before you begin to format your paper, first write and save the content as a 
-separate text file. Complete all content and organizational editing before 
-formatting. Please note sections \ref{AA} to \ref{FAT} below for more information on 
-proofreading, spelling and grammar.
+\section{Methodology}
+\subsection{Gathering Disk Information}
+A easy and reproduceable testing environment must be created. A small 16 GB USB
+drive was used as the form of storage device in BitSaver's tests. Due to the
+time it takes to encrypt and decrypt a large drive, larger drive sizes were not
+considered for testing. The 16 GB USB drive was formatted to FAT32 
+and the recovery key was stored externally for unlocking.
 
-Keep your text and graphic files separate until after the text has been 
-formatted and styled. Do not number text heads---{\LaTeX} will do that 
-for you.
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{bitlockered_disk.png}
+\caption{BitSaver CLI for users to choose options.}
+\label{fig:bitlockered_drive}
+\end{figure}
+
+Afterwards, the disk's BitLocker partition was deleted via Windows DiskPart.
+This resulted in Windows Disk Manager recognizing the partition as unallocated.
+Accessing the data also prompts a formatting request (which should not be
+accepted to preserve the data). Standard data recovery software yields no
+results when files are analyzed for recovery such as Get Data Back Pro (GDBP). 
+
+When a partition deletion occurs, the disk's partition table has been modified
+to clear off the partition as allocated. A rewrite of the boot record on the
+disk is required to restore functionality to the disk. However, the boot record
+is incredibly sensitive and requires an accurate approximation of the size of
+the BitLocker partition to avoid deleting unintended data.
+
+Thus, the first step required is to poll the data of all disks to gather
+information about the partitions on each disk. The program utilizes a Windows
+built-in PowerShell command Get-BitlockerVolume and Get-Disk to gather and
+format data regarding all data storage on the system. Some of the most
+important information gathered about the disks is the disk number, size, boot
+status, drive letters, and BitLocker status. All of this information is
+neccessary to perform accurate disk operations.
+
+Afterwards, it marks the disk that the program is running off as unprocessable
+to protect the native boot drive from destructive disk writes. If selected, the
+program will error out and prompt user to choose a different disk. All other
+disks are allowed to be operated on. If a valid, non-boot disk is selected,
+deeper disk data is gathered via Windows Get-Disk such as logical sector size,
+Logical Block Addressing (LBA) sector count, and true size. Logical sector size is the total size of a single
+sector measured in bytes. The LBA sector count is the number of logical sectors on the storage device. Lastly,
+the total size is the number of bytes that the device can hold. The LBA sector count can be calculated by:
+ 
+\begin{equation}
+s/l=\gamma\label{eq}
+\end{equation}
+
+where $s$ is the capacity of the storage device in bytes, $l$ is the logical sector size, and $\gamma$ is the LBA sector count.
+The LBA sector count is crucial to correct disk operations as a disk is divided and numbered by these sectors.
+
+\subsection{Finding BitLocker Sector and Count}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{delete_partition.png}
+\caption{BitSaver CLI for users to choose options.}
+\label{fig:delete_partition}
+\end{figure}
 
 \subsection{Abbreviations and Acronyms}\label{AA}
 Define abbreviations and acronyms the first time they are used in the text, 

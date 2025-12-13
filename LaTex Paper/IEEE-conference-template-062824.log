@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 23.5) (preloaded format=pdflatex 2023.9.14)  12 DEC 2025 15:49
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 23.5) (preloaded format=pdflatex 2023.9.14)  12 DEC 2025 17:00
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -266,7 +266,7 @@ File: l3backend-pdftex.def 2023-04-19 L3 backend support: PDF output (pdfTeX)
 )
 (IEEE-conference-template-062824.aux
 
-LaTeX Warning: Label `fig' multiply defined.
+LaTeX Warning: Label `eq' multiply defined.
 
 )
 \openout1 = `IEEE-conference-template-062824.aux'.
@@ -307,47 +307,57 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
 
 (C:\Program Files\MiKTeX\tex/latex/00miktex\epstopdf-sys.cfg
 File: epstopdf-sys.cfg 2021/03/18 v2.0 Configuration of epstopdf for MiKTeX
-))
-<fig1.png, id=1, 249.3315pt x 189.22694pt>
-File: fig1.png Graphic file (type png)
-<use fig1.png>
-Package pdftex.def Info: fig1.png  used on input line 104.
-(pdftex.def)             Requested size: 249.33087pt x 189.22647pt.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 116
-.
-
-(C:\Program Files\MiKTeX\tex/latex/amsfonts\umsa.fd
-File: umsa.fd 2013/01/14 v3.01 AMS symbols A
-)
-LaTeX Font Info:    Trying to load font information for U+msb on input line 116
-.
-
-(C:\Program Files\MiKTeX\tex/latex/amsfonts\umsb.fd
-File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-) [1{C:/Users/aleung/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{C:/Progr
-am Files/MiKTeX/fonts/enc/dvips/base/8r.enc}
+)) [1{C:/Users/aleung/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{C:/Prog
+ram Files/MiKTeX/fonts/enc/dvips/base/8r.enc}
 
 
 ]
-LaTeX Font Info:    Trying to load font information for OT1+pcr on input line 1
-51.
+<menu.png, id=9, 288.3272pt x 550.30594pt>
+File: menu.png Graphic file (type png)
+<use menu.png>
+Package pdftex.def Info: menu.png  used on input line 114.
+(pdftex.def)             Requested size: 252.0pt x 480.9875pt.
+<bitlockered_disk.png, id=11, 567.62062pt x 158.09062pt>
+File: bitlockered_disk.png Graphic file (type png)
+<use bitlockered_disk.png>
+Package pdftex.def Info: bitlockered_disk.png  used on input line 129.
+(pdftex.def)             Requested size: 252.0pt x 70.18486pt.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 163
+.
+ (C:\Program Files\MiKTeX\tex/latex/amsfonts\umsa.fd
+File: umsa.fd 2013/01/14 v3.01 AMS symbols A
+)
+LaTeX Font Info:    Trying to load font information for U+msb on input line 163
+.
+ (C:\Program Files\MiKTeX\tex/latex/amsfonts\umsb.fd
+File: umsb.fd 2013/01/14 v3.01 AMS symbols B
+)
+<delete_partition.png, id=12, 1425.07407pt x 510.40688pt>
+File: delete_partition.png Graphic file (type png)
+<use delete_partition.png>
+Package pdftex.def Info: delete_partition.png  used on input line 174.
+(pdftex.def)             Requested size: 252.0pt x 90.25711pt.
+ [2 <./menu.png> <./bitlockered_disk.png>]
+LaTeX Font Info:    Trying to load font information for OT1+pcr on input line 2
+11.
 
 (C:\Users\aleung\AppData\Roaming\MiKTeX\tex/latex/psnfss\ot1pcr.fd
 File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
-) [2 <./fig1.png (PNG copy)>]
+) [3 <./delete_partition.png>]
+<fig1.png, id=27, 249.3315pt x 189.22694pt>
 File: fig1.png Graphic file (type png)
 <use fig1.png>
-Package pdftex.def Info: fig1.png  used on input line 256.
+Package pdftex.def Info: fig1.png  used on input line 316.
 (pdftex.def)             Requested size: 249.33087pt x 189.22647pt.
-LaTeX Font Info:    Trying to load font information for OMS+ptm on input line 2
-67.
+LaTeX Font Info:    Trying to load font information for OMS+ptm on input line 3
+27.
 
 (C:\Users\aleung\AppData\Roaming\MiKTeX\tex/latex/psnfss\omsptm.fd
 File: omsptm.fd 
 )
 LaTeX Font Info:    Font shape `OMS/ptm/m/n' in size <10> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 267.
- [3]
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 327.
+ [4 <./fig1.png (PNG copy)>]
 
 ** Conference Paper **
 Before submitting the final camera ready copy, remember to:
@@ -359,7 +369,7 @@ Before submitting the final camera ready copy, remember to:
  uses only Type 1 fonts and that every step in the generation
  process uses the appropriate paper size.
 
-[4
+[5
 
 ] (IEEE-conference-template-062824.aux)
  ***********
@@ -372,10 +382,10 @@ LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 4265 strings out of 475248
- 65590 string characters out of 5767625
- 1935801 words of memory out of 5000000
- 25744 multiletter control sequences out of 15000+600000
+ 4289 strings out of 475248
+ 66125 string characters out of 5767625
+ 1936801 words of memory out of 5000000
+ 25768 multiletter control sequences out of 15000+600000
  599998 words of font info for 113 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  57i,11n,65p,608b,304s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -388,9 +398,9 @@ fb><C:/Program Files/MiKTeX/fonts/type1/urw/courier/ucrr8a.pfb><C:/Program File
 s/MiKTeX/fonts/type1/urw/times/utmb8a.pfb><C:/Program Files/MiKTeX/fonts/type1/
 urw/times/utmbi8a.pfb><C:/Program Files/MiKTeX/fonts/type1/urw/times/utmr8a.pfb
 ><C:/Program Files/MiKTeX/fonts/type1/urw/times/utmri8a.pfb>
-Output written on IEEE-conference-template-062824.pdf (4 pages, 156988 bytes).
+Output written on IEEE-conference-template-062824.pdf (5 pages, 241746 bytes).
 PDF statistics:
- 72 PDF objects out of 1000 (max. 8388607)
+ 82 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
- 6 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 21 words of extra memory for PDF output out of 10000 (max. 10000000)
 
