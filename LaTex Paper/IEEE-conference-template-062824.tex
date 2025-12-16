@@ -17,7 +17,7 @@ States of America \\ aleung@unr.edu} }
 \maketitle
 
 \begin{abstract} Due to the rise of cybercrime and data theft, industries
-	and consumers have started worrying about their data and computing 
+	and consumers have begun to worry about their data and computing 
 	practices. This has led to
 	a majority of industries and homes to begin practicing
 	data encryption. Window's native BitLocker system provides enterprise and
@@ -32,7 +32,7 @@ States of America \\ aleung@unr.edu} }
 	detects and finds BitLocker partitions and rebuilds partition tables to
 allow an encrypted disk to be readable again, assuming that a BitLocker
 recovery key exists and is in the possession of law enforcement or data
-forensics . \end{abstract}
+forensics. \end{abstract}
 
 \begin{IEEEkeywords} encryption, data, forensics, BitLocker, recovery.
 \end{IEEEkeywords}
@@ -58,7 +58,7 @@ encrypted piece of evidence so that it can be used in the court of law \cite{b5}
 \subsection{BitSaver Objectives and Motivation} When an individual manually
 deletes a BitLocker partition, the data does not get deleted. Instead, the disk
 marks the partition as unallocated space so that new data can be written to the unallocated partition.
-Thus, the data remains on the drive so long as no additional data overwrites the unallocated data.
+Thus, the data remains on the drive so long as no additional data overwrites the previous data.
 However, the data partition still cannot be read directly, either with or without data recovery software,
 due to the encryption from BitLocker. Suspects who are
 informed on disk partitioning schemes and BitLocker may delete a BitLocker partition in order
@@ -95,7 +95,7 @@ accurately calculates partition sizes, and safely writes boot records for its us
 
 \subsection{BitSaver Plans and Implementation} To implement this tool, standard
 Python libraries, PowerShell commands, and Runtime Software's open source, free
-DriveDoppel executable were used \cite{b7}. Python was chosen to implement a user-friendly
+DriveDoppel executable were all used \cite{b7}. Python was chosen to implement a user-friendly
 interface to communicate with the user and to wrap special system calls. Standard libraries like Hashlib, 
 Ctypes, etc. were used for their ability to analyze disk data and make calls to the Windows operating system.
 Non-standard libraries include: pyuac, pypiwin32, PySide6, and hexdump. PowerShell was used to communicate system calls to the disk safely in Windows.
@@ -111,7 +111,7 @@ drive as an option to prevent critical damage on the operating system running th
 the menu is shown in Fig.~\ref{fig:menu}. Users in this screen are able to see
 the hostname of the machine they are working on and see many useful, surface-level attributes
 about the storage devices connected to the machine such as drive number, friendly 
-drive names (official models, which is useful for documentation purposes), encryption status, and capacity.
+drive names (official models, which are useful for documentation purposes), encryption status, and capacity.
 
 \begin{figure}[t] \centering \includegraphics[width=\columnwidth]{menu.png}
 \caption{BitSaver CLI for users to choose options.} \label{fig:menu}
@@ -128,12 +128,12 @@ issue.
 Instead, almost every source provides their own sponsored, paid software to
 resolve this issue. On the other hand, BitSaver believes that potential critical data loss should
 not be left to the mercy of paid tools. Instead, BitSaver seeks to provide the
-foundation of open source software that can be used to protect and restore critical data.
+foundation of open source software that can be used to protect and restore critical data for free.
 
 \subsection{Manual Processes}
 
 There are several sources that provide manual steps to resolve this issue, which
-this entire project is based on. For example, Norman Bauer, published a blog
+this entire project is based on. For example, Norman Bauer published a blog
 page in 2013 that instructs people on how to restore a deleted BitLocker partition using
 only the Windows OS and the open source 7-zip application. However, his methods
 merely takes a copy of the data off of a drive rather than
@@ -143,8 +143,8 @@ BitLocker functionality without destroying the data \cite{b2}.
 
 Another source, which provides the groundwork for this application, is Runtime
 Software's BitLocker data recovery guide. The guide instructs the user on how to
-explore a disk's sector to map out the partition needed to be written to the
-disk's partition table using DiskExplorer X, DriveDoppel, and GetDataBack Pro.
+explore a disk's sectors in order to map out and restore the affected partition 
+using DiskExplorer X, DriveDoppel, and GetDataBack Pro.
 While the content is very well-written, the guide still attempts to sell its
 paid software GetDataBack Pro. However, its freeware DiskExplorer X was used in
 this project to verify the integrity of each step taken by the application in
@@ -160,9 +160,9 @@ the data stored on deleted, locked BitLocker partitions \cite{b1}.
 To start off, an easy and
 reproduceable testing environment is created. In this environment, a small 16 GB USB drive was
 used as the primary form of storage device in BitSaver's earliest tests. Due to the time it
-takes to encrypt and decrypt a large drive, larger drive sizes were not
-considered for initial testing of functionality. The 16 GB USB drive was formatted to FAT32 and the
-recovery key was stored externally for unlocking and verifaction. To begin, Windows's built-in
+takes to encrypt and decrypt large drives, larger drive sizes were not
+considered for initial testing of functionality. The 16 GB USB drive was formatted to FAT32, and the
+recovery key was stored externally for unlocking and verification. To begin, Windows's built-in
 BitLocker application was used to encrypt the 16 GB USB drive as shown in
 Fig.~\ref{fig:bitlockered_drive}.
 
@@ -206,7 +206,7 @@ disk.} \label{fig:inaccessible} \end{figure}
 	status. All of this information is neccessary to perform accurate, informed disk
 	operations.
 
-	Afterwards, BitSaver marks the disk that the program is running off as
+	Afterwards, BitSaver marks the disk that the program is running off of as
 	unprocessable and unselectable to protect the native boot drive from destructive disk
 	writes. If selected, the program will error out and prompt user to
 	choose a different disk. All other devices are allowed to be operated on.
@@ -252,11 +252,11 @@ signature.} \label{fig:bitlocker_sector} \end{figure}
 
 Afterwards, the partition size needs to be calculated by the following:
 
-\begin{equation} s-b=p\label{eq:partition_size_eq} \end{equation}
+\begin{equation} \gamma-b=p\label{eq:partition_size_eq} \end{equation}
 
-where $s$ is the capacity of the storage device in bytes, $b$ is the starting
-sector for the BitLocker partition, and $p$ is the partition size. This is used to calculate
-the partition size to write to the partition table in the next step. 
+where $\gamma$ is the LBA sector count of the storage device, $b$ is the starting
+sector for the BitLocker partition, and $p$ is the partition size in sectors. This is used to calculate
+the partition entry to write to the partition table in the next step. 
 
 \subsection{Rebuilding the BitLocker MBR}
 
@@ -281,7 +281,7 @@ of the potentially destructive operation.
 
 If the user approves, DriveDoppel writes the new partition data to the partition
 table as shown in Fig.~\ref{fig:disk_doppel}. With a correct write, Windows
-should recognize the disk as a disk with BitLocker enabled and prompt the user to
+should recognize the disk as having BitLocker enabled and prompt the user to
 enter the recovery key for the disk (in some cases, a physical disconnect and reconnect may be needed
 for Windows to recognize the change in the device's partition table). After entering the correct recovery key, the user should
 be able to access the data previously locked anyway by BitLocker and
@@ -311,7 +311,7 @@ For the experiment to test out the integrity of BitSaver, two 16 GB USB drives
 each with unique BitLocker recovery keys and encryption, were used. For the 500 GB and 256 GB devices, a test on whether or not
 an operating system drive can be restored was also added. 
 
-Firstly, all devices had filler data stored on them. Afterwards, BitLocker was turned on for all four individual devices. Afterwards,
+Firstly, all devices had filler data stored on them. Then, BitLocker was turned on for all four individual devices. Afterwards,
 all four devices had their BitLocker partitions deleted through DiskPart.
 BitSaver will attempt to restore BitLocker functionality to each device
 individually. If the device does not seem to respond to the fix, a manual removal and reconnection will be applied
@@ -339,9 +339,9 @@ a count of 488,381,292 LBA sectors and a sector size of 512. After the operation
 not reading. However, after a reconnect, the testing operating system recognized the disk's new properties. The data was then recovered after entering the BitLocker password.
 The results worked for both NTFS and FAT32 drives. Similar to the previous experiment, partitioning the drive as FAT32 or NTFS worked.
 
-\subsection{256 GB NVME, NTFS/FAT32, OS Drive}
+\subsection{256 GB NVME, NTFS, OS Drive}
 
-The 256 GB NVME had a total for 250,051,221,504 Bytes. The device had an operating system partition (Windows 11) in the middle of the drive with a System EFI partition on its
+The 256 GB NVME had a total of 250,051,221,504 Bytes. The device had an operating system partition (Windows 11) in the middle of the drive with a System EFI partition on its
 left and a recovery partition on its right. The disk had a count of 488,381,292 LBA sectors and a sector size of 512. After the operation, the disk was not reading. However,
 even after the reconnect, the data was not recovered. Instead, the operating system interpretted the 
 the partition as RAW. Thus, BitSaver was unable to recover data on this drive.
@@ -353,9 +353,9 @@ a count of 976,762,584 LBA sectors and a sector size of 512. After the operation
 not reading. However, after a reconnect, the testing operating system recognized the disk's new properties. The data was recovered after entering the BitLocker password.
 The results worked for both NTFS and FAT32 drives. 
 
-\subsection{500 GB SSD, NTFS/FAT32, OS Drive}
+\subsection{500 GB SSD, NTFS, OS Drive}
 
-The 500 GB SSD had a total for 500,102,443,008 Bytes. The device had an operating system partition (Windows 11) in the middle of the drive with a System EFI partition on its
+The 500 GB SSD had a total of 500,102,443,008 Bytes. The device had an operating system partition (Windows 11) in the middle of the drive with a System EFI partition on its
 left and a recovery partition on its right. The disk had a count of 976,762,584 LBA sectors and a sector size of 512. After the operation, the disk was not reading. However,
 even after the reconnect, the data was not recovered. Instead, the operating system interpretted the 
 the partition as RAW. Thus, BitSaver was unable to recover data on this drive.
@@ -366,7 +366,7 @@ the partition as RAW. Thus, BitSaver was unable to recover data on this drive.
 
 \subsection{Findings} 
 
-The program worked well over all the DATA only drives, which are the most
+The program worked well over all the data only drives, which are the most
 common drives that suspects can encrypt on-the-fly. In all three experiments
 considering data only drives, BitSaver was able to recover the data on all of
 them. Some, however, required a reconnect for the testing operating system to
@@ -395,31 +395,31 @@ is an OS drive or a data drive (which means if there are more partitions on the 
 \subsection{Closing Remarks} 
 In summary, BitLocker as a technology, though intended to secure data for enterprise and privacy reasons, has become a barrier for
 law enforcement and people involved in digital forensics. Even worse, disk partitions with BitLocker encryption can be manually deleted,
-which causes standard data reading techniques to be ineffective in reading potentially important data on a suspect's devices. 
+which causes standard data reading techniques to be ineffective in reading potentially important data off a suspect's devices. 
 Thus, suspects can take advantage of these operations and obscure important
 pieces of evidence from law enforcement and even maliciously recover the data at a future date. BitSaver was made to solve
 this problem. Through only open source and free software, BitSaver is a program that automatically detects BitLocker partitions
 and attempt to rewrite partition tables in order to restore BitLocker functionality on an otherwise unreadable disk. Though there are many commerically avaiable products,
-all of the products require money. For the processes that teach users how to write their own partition tables, the processes are complicated and not simple for the average user.
-Making mistakes while following instructions can lead to catastrophic data loss. Through understanding the structure of file systems and disks, BitSaver identifies BitLocker sectors (through BitLocker's unique signature) and writes new partition tables
-to reestablish deleted partitions and restore the disk's ability to be interpretted by the testing operating system. The results indicate great success with restoring
-data drives and no success with os drives. However, as the program is still in development, further changes can be applied to fix this issue.
+most of the products require money and do not provide free help. For the processes that do teach users how to write their own partition tables, the processes are complicated and not simple for the average user.
+Making mistakes while following these sensitive instructions can lead to catastrophic, permanent data loss. Through understanding the structure of file systems and disks, BitSaver identifies BitLocker sectors and safely writes new partition tables
+to reestablish deleted partitions and restore the disk's ability to be interpretted. The results indicate great success with restoring
+data drives and no success with os drives. However, as the program is still in development, future changes can be applied to fix this issue.
 
 \subsection{Future Plans}
 
 In the future, the project would like to directly explore creating its own
-partition writing component without the use of third-party tools like Runtime
+MBR writing component without the use of third-party tools like Runtime
 Software's DriveDoppel. There is ground work laid out already on writing
 disk partition tables through hexdumps and modifying a disk on the system
 level. However, this capability was not explorered in this paper. In addition,
 the project would like to explore converting the CLI-based operations into
 Application Programming Interface based operations or Graphical User Interface based operations.
 However, for the current project
-scope, the CLI is believed to be sufficient to demonstrate a proof of concept. Currently, BitSaver cannot restore
-OS drives. However, this can be remedied in the future given the critical results of the paper.
-Potentially, allowing the user to select partitions within a drive would allow for the restoration
+scope, the CLI is believed to be sufficient to demonstrate a proof of concept. Furthermore, BitSaver currently cannot restore
+OS drives. However, this can be remedied in the future given the critical results provided by this paper.
+Allowing the user to select partitions within a drive potentially would allow for the restoration
 to work on a partition level without affecting other partitions (similar to DiskPart). 
-Thus, deeper menus to look into partitions would be another likely implementation.
+Thus, deeper menus to look into partitions would be a necessary future implementation.
 
 \section*{Acknowledgement}
 
