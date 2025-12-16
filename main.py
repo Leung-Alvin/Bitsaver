@@ -293,7 +293,7 @@ def disk_menu(disk):
     while True:
         print("\n===Disk Menu===")
         print("1. Find Bitlocker Sector")
-        print("2. Rebuild Bootlocker MBR")
+        print("2. Rebuild Bitlocker MBR")
         print("3. Read Boot Record")
         print("4. Exit")
         choice = input("Enter choice: ")
